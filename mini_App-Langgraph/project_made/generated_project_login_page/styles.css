@@ -1,0 +1,102 @@
+/*
+ * styles.css
+ *
+ * This stylesheet defines the visual style for the SimpleLoginPage.
+ * It includes root variables, a global reset, layout styling, form
+ * element styling, button styling, and responsive adjustments.
+ */
+
+/* 1. Root CSS variables for colors, font, and spacing */
+:root {
+    --primary-color: #4a90e2;
+    --secondary-color: #ffffff;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --spacing-base: 1rem;
+}
+
+/* 2. Global reset and base font */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font-family);
+}
+
+/* 3. Body layout: center form with flexbox */
+body {
+    min-height: 100vh;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 4. Login container styling */
+.login-container {
+    max-width: 400px;
+    width: 100%;
+    padding: var(--spacing-base);
+    background: var(--secondary-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-base);
+}
+
+/* Ensure the form inside the container uses flex layout */
+.login-container form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-base);
+}
+
+/* 5. Form element styling */
+.login-container label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.login-container input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+/* Submit button styling */
+.btn-submit {
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-submit:hover {
+    background: #357ABD; /* Slightly darker shade of primary color */
+}
+
+/* 7. Responsive adjustments for small screens */
+@media (max-width: 480px) {
+    .login-container {
+        padding: calc(var(--spacing-base) * 0.9);
+    }
+    .login-container input,
+    .btn-submit {
+        font-size: 0.9rem;
+        padding: calc(0.75rem * 0.9);
+    }
+}
