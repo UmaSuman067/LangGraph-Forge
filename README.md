@@ -1,2 +1,2 @@
 # LangGraph-Forge
-An AI-powered application generator that converts natural language descriptions into functional web projects using a multi-agent LangGraph architecture.
+A multi-agent, LangGraph-driven AI system that transforms plain-language ideas into fully functional web applications, automating the entire project generation process from concept to code.
