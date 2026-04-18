@@ -6,10 +6,11 @@ from langgraph.constants import END
 from langgraph.graph import StateGraph
 import json
 import re
+import os
 
 from prompts import *
 from states import *
-from tools import write_file, read_file, get_current_directory, list_files, init_project_root
+from tools import write_file, read_file, get_current_directory, list_files, PROJECT_BASE, set_active_project
 from visualize import save_graph_visualization
 
 # Load environment variables
@@ -22,19 +23,18 @@ set_verbose(True)
 # Using a more stable model for tool calling and structured output
 llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0, max_retries=3)
 
-# Initialize the generated_project directory
-init_project_root()
+# Removed static init_project_root()
 
 def planner_agent(state: dict) -> dict:
     """Converts user prompt into a structured Plan."""
     user_prompt = state["user_prompt"]
     
-    # Explicit system instruction to prevent JSON schema nesting errors
     system_msg = SystemMessage(content="You are a project planner. Return ONLY the direct values for the schema. Do not wrap values in {'type':..., 'value':...} objects.")
     
+    context = state.get("context", "")
     resp = llm.with_structured_output(Plan).invoke([
         system_msg,
-        HumanMessage(content=planner_prompt(user_prompt))
+        HumanMessage(content=planner_prompt(user_prompt, context=context))
     ])
     
     if resp is None:
@@ -148,11 +148,60 @@ agent = graph.compile()
 save_graph_visualization(agent)
 
 if __name__ == "__main__":
-    description = input("Enter your project description: ")
+    print("Welcome to App-Builder LangGraph")
+    print("1. Create New Project")
+    print("2. Modify Existing Project")
+    choice = input("Enter choice (1/2): ").strip()
+    
+    context_data = ""
+    if choice == "2":
+        if not PROJECT_BASE.exists() or not any(PROJECT_BASE.iterdir()):
+            print("No existing projects found in project_made/ directory.")
+            exit(1)
+        
+        projects = [d.name for d in PROJECT_BASE.iterdir() if d.is_dir()]
+        print("Existing projects:")
+        for i, p in enumerate(projects):
+            print(f"{i+1}. {p}")
+        
+        try:
+            proj_idx = int(input("Select project number to modify: ")) - 1
+            selected_proj = projects[proj_idx]
+        except (ValueError, IndexError):
+            print("Invalid selection.")
+            exit(1)
+        
+        set_active_project(selected_proj)
+        
+        # Load existing files context
+        print(f"Loading context from {selected_proj}...")
+        for root, _, files in os.walk(PROJECT_BASE / selected_proj):
+            for file in files:
+                filepath = os.path.join(root, file)
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        file_content = f.read()
+                    rel_path = os.path.relpath(filepath, PROJECT_BASE / selected_proj)
+                    context_data += f"\\n--- FILE: {rel_path} ---\\n{file_content}\\n"
+                except Exception as e:
+                    print(f"Skipping {filepath} due to read error: {e}")
+        
+        description = input(f"Enter your modification request for {selected_proj}: ")
+    
+    else:
+        proj_name = input("Enter new project name (e.g. calculator_app): ").strip().replace(" ", "_")
+        if not proj_name:
+            proj_name = "default_project"
+        set_active_project(proj_name)
+        description = input("Enter your project description: ")
+
     result = agent.invoke(
-        {"user_prompt": description},
+        {
+            "user_prompt": description,
+            "context": context_data
+        },
         {"recursion_limit": 50}
     )
     print("\n--- Execution Finished ---")
     print("Final Status:", result.get("status", "COMPLETED"))
-    print("Your app files have been generated in the project root.")
+    print("Your app files have been generated/modified in the project root.")

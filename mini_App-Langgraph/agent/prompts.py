@@ -1,8 +1,10 @@
-def planner_prompt(user_prompt: str) -> str:
+def planner_prompt(user_prompt: str, context: str = "") -> str:
+    context_section = f"\n\nExisting files in the project:\n{context}\n\nPlease factor these existing files into your plan. If modifying, detail how these files will change or what new files will be added." if context else ""
+    
     PLANNER_PROMPT = f"""
 You are the PLANNER agent. Convert the user prompt into a COMPLETE engineering project plan. Carefully consider the requirements and constraints specified by the user. define all the necessary files that has to be made for the project. carefully required for the project to be successful.
 all the files that should be made and their purposes.
-you are not provided any tools to read or write files. your only task is to create a comprehensive project plan based on the user's request in structured format.
+you are not provided any tools to read or write files. your only task is to create a comprehensive project plan based on the user's request in structured format.{context_section}
 
 User request:
 {user_prompt}
