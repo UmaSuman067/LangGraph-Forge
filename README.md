@@ -26,19 +26,35 @@ uv pip install -e .
 cp .sample_env .env
 # Add your GEMINI_API_KEY or GROQ_API_KEY to .env
 
-# Running the App
+## Interactive App Builder Flow
+Launch the agent to dynamically create or modify AI-generated projects.
+```bash
 python agent/graph.py
+```
+Upon running, you'll be prompted to choose an action:
+1. **Create New Project**: Provide an app name and description to bootstrap a brand new codebase.
+2. **Modify Existing Project**: Select a previously built app from `project_made/` and provide a new prompt. The agent reads the existing codebase as context to intuitively upgrade or refactor the app.
+
+## Project Runner
+Once you have generated projects, use the interactive project runner to securely execute them locally:
+```bash
+python run_project.py
+```
+* **Python Scripts:** Automatically detects and runs `main.py` or `app.py`.
+* **Static Sites:** Automatically spins up a local HTTP server for projects mapping `index.html`.
+* **Node Modules:** Intelligently triggers `npm install` and `npm start` for apps containing `package.json`.
 
 ## Project Structure
 agent/
-│── graph.py        # LangGraph workflow
+│── graph.py        # LangGraph workflow (Interactive Builder)
 │── prompts.py      # Agent instructions
 │── states.py       # State models (Pydantic)
 │── tools.py        # File operations
 │── visualize.py    # Graph visualization
 
-main.py             # Entry point
+run_project.py      # Runner script to launch apps
 pyproject.toml      # Dependencies
+project_made/       # Sandbox directory for all generated/modified projects
 
 Configuration & Model Support
 The system is optimized for structured output and tool calling.
@@ -65,5 +81,5 @@ Solution: The selected model doesn't support the current tool schema. Upgrade to
 Issue: API Quota Exceeded.
 Solution: Implement exponential backoff or switch to a higher-tier API key.
 Issue: Generated project files are missing.
-Solution: Check the generated_project/ root for logs; ensure the agent has write permissions.
+Solution: Check the project_made/ root for logs; ensure the agent has write permissions.
 
